@@ -150,7 +150,7 @@ fun contentHomeScreen(
     Column(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .fillMaxSize(0.9f)
+                .fillMaxWidth(0.9f)
                 .align(Alignment.CenterHorizontally)
         ) {
             Spacer(modifier = Modifier.height(16.dp))

@@ -24,7 +24,7 @@ class AuthViewModel @Inject constructor(
     val email = dataStoreManager.email
     val user = mutableStateOf<User?>(null)
 
-    fun getUser(){
+    fun getUser() {
         viewModelScope.launch {
             user.value = weatherRepository.getUser(dataStoreManager.email.firstOrNull().orEmpty())
         }
@@ -56,5 +56,9 @@ class AuthViewModel @Inject constructor(
                 msgSuccess.value = "Berhasil mengupdate profil"
             }
         }
+    }
+
+    fun keluar() {
+        viewModelScope.launch { dataStoreManager.editEmail("") }
     }
 }

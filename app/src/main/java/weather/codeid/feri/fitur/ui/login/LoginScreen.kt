@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import kotlinx.coroutines.delay
 import weather.codeid.feri.data.local.roomdb.entity.User
 import weather.codeid.feri.fitur.viewmodels.AuthViewModel
 import weather.codeid.feri.utils.Constant
@@ -50,6 +51,9 @@ fun loginScreen(navController: NavController, authViewModel: AuthViewModel = hil
     val isSuccess by remember {
         authViewModel.isSuccess
     }
+    val msgError by remember {
+        authViewModel.msgError
+    }
     if (isSuccess) navController.navigate(Constant.Route.homeScreen) {
         popUpTo(Constant.Route.registerScreen) { inclusive = true }
     }
@@ -70,6 +74,22 @@ fun loginScreen(navController: NavController, authViewModel: AuthViewModel = hil
                         Alignment.CenterHorizontally
                     )
             )
+            if (msgError.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    backgroundColor = MaterialTheme.colors.primary,
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    Column(Modifier.padding(16.dp)) { Text(text = msgError) }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                LaunchedEffect(key1 = true) {
+                    delay(3000)
+                    authViewModel.msgError.value = ""
+                }
+            }
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },

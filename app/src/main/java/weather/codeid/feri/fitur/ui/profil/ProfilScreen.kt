@@ -1,5 +1,6 @@
 package weather.codeid.feri.fitur.ui.profil
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import kotlinx.coroutines.delay
 import weather.codeid.feri.data.local.roomdb.entity.User
 import weather.codeid.feri.fitur.viewmodels.AuthViewModel
 import weather.codeid.feri.utils.Constant
@@ -63,6 +65,9 @@ fun profilScreen(navController: NavController, authViewModel: AuthViewModel = hi
     var msgSuccess by remember {
         authViewModel.msgSuccess
     }
+    var msgError by remember {
+        mutableStateOf("")
+    }
     user?.let {
         firstname = it.firstName.toString()
         lastname = it.lastName.toString()
@@ -92,15 +97,36 @@ fun profilScreen(navController: NavController, authViewModel: AuthViewModel = hi
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-            if (msgSuccess.isNotEmpty()) Card(
-                backgroundColor = MaterialTheme.colors.primary,
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .align(Alignment.CenterHorizontally)
-            ) {
-                Column(Modifier.padding(16.dp)) { Text(text = msgSuccess) }
+            if (msgSuccess.isNotEmpty()) {
+                Card(
+                    backgroundColor = MaterialTheme.colors.primary,
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    Column(Modifier.padding(16.dp)) { Text(text = msgSuccess) }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                LaunchedEffect(key1 = true) {
+                    delay(1500)
+                    msgSuccess = ""
+                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            if (msgError.isNotEmpty()) {
+                Card(
+                    backgroundColor = MaterialTheme.colors.primary,
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    Column(Modifier.padding(16.dp)) { Text(text = msgError) }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                LaunchedEffect(key1 = true) {
+                    delay(1500)
+                    msgError = ""
+                }
+            }
             OutlinedTextField(
                 value = firstname,
                 onValueChange = { firstname = it },
@@ -176,6 +202,31 @@ fun profilScreen(navController: NavController, authViewModel: AuthViewModel = hi
             Button(
                 onClick = {
                     keyboard?.hide()
+                    if (firstname.isEmpty()) {
+                        msgError = "Nama depan tidak boleh kosong"
+                        firstFocus.requestFocus()
+                        return@Button
+                    }
+                    if (lastname.isEmpty()) {
+                        msgError = "Nama belakang tidak boleh kosong"
+                        lastFocus.requestFocus()
+                        return@Button
+                    }
+                    if (email.isEmpty()) {
+                        msgError = "Email tidak boleh kosong"
+                        emailFocus.requestFocus()
+                        return@Button
+                    }
+                    if (alamat.isEmpty()) {
+                        msgError = "Alamat tidak boleh kosong"
+                        alamatFocus.requestFocus()
+                        return@Button
+                    }
+                    if (password.isEmpty()) {
+                        msgError = "Password tidak boleh kosong"
+                        passwodFocus.requestFocus()
+                        return@Button
+                    }
                     authViewModel.updateProfil(
                         User(
                             id = user?.id,
@@ -193,6 +244,24 @@ fun profilScreen(navController: NavController, authViewModel: AuthViewModel = hi
                     .height(48.dp)
             ) {
                 Text(text = "Simpan")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedButton(
+                onClick = {
+                    keyboard?.hide()
+                    authViewModel.keluar()
+                    navController.navigate(Constant.Route.loginScreen) {
+                        popUpTo(Constant.Route.profilScreen) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .align(Alignment.CenterHorizontally)
+                    .height(48.dp),
+                border = BorderStroke(1.dp, color = MaterialTheme.colors.primary)
+            ) {
+                Text(text = "Keluar")
             }
         }
     }

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import kotlinx.coroutines.delay
 import weather.codeid.feri.data.local.roomdb.entity.User
 import weather.codeid.feri.fitur.viewmodels.AuthViewModel
 import weather.codeid.feri.utils.Constant
@@ -52,6 +53,9 @@ fun registerScreen(navController: NavController, authViewModel: AuthViewModel = 
     var showPassword by remember {
         mutableStateOf(false)
     }
+    val msgError by remember {
+        authViewModel.msgError
+    }
     val (firstFocus, lastFocus, emailFocus, alamatFocus, passwodFocus) = FocusRequester.createRefs()
     val keyboard = LocalSoftwareKeyboardController.current
     val isSuccess by remember {
@@ -68,7 +72,7 @@ fun registerScreen(navController: NavController, authViewModel: AuthViewModel = 
         ) {
             Spacer(modifier = Modifier.height(32.dp))
             Text(
-                text = "Register Now",
+                text = "Register Sekarang",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.W700,
                 modifier = Modifier
@@ -77,6 +81,22 @@ fun registerScreen(navController: NavController, authViewModel: AuthViewModel = 
                         Alignment.CenterHorizontally
                     )
             )
+            if (msgError.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    backgroundColor = MaterialTheme.colors.primary,
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    Column(Modifier.padding(16.dp)) { Text(text = msgError) }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                LaunchedEffect(key1 = true) {
+                    delay(3000)
+                    authViewModel.msgError.value = ""
+                }
+            }
             OutlinedTextField(
                 value = firstname,
                 onValueChange = { firstname = it },
@@ -150,14 +170,41 @@ fun registerScreen(navController: NavController, authViewModel: AuthViewModel = 
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
+                    if (firstname.isEmpty()) {
+                        authViewModel.msgError.value = "Nama depan tidak boleh kosong"
+                        firstFocus.requestFocus()
+                        return@Button
+                    }
+                    if (lastname.isEmpty()) {
+                        authViewModel.msgError.value = "Nama belakang tidak boleh kosong"
+                        lastFocus.requestFocus()
+                        return@Button
+                    }
+                    if (email.isEmpty()) {
+                        authViewModel.msgError.value = "Email tidak boleh kosong"
+                        emailFocus.requestFocus()
+                        return@Button
+                    }
+                    if (alamat.isEmpty()) {
+                        authViewModel.msgError.value = "Alamat tidak boleh kosong"
+                        alamatFocus.requestFocus()
+                        return@Button
+                    }
+                    if (password.isEmpty()) {
+                        authViewModel.msgError.value = "Password tidak boleh kosong"
+                        passwodFocus.requestFocus()
+                        return@Button
+                    }
                     keyboard?.hide()
-                    authViewModel.register(User(
-                        firstName = firstname,
-                        lastName = lastname,
-                        email = email,
-                        alamat = alamat,
-                        password = password
-                    ))
+                    authViewModel.register(
+                        User(
+                            firstName = firstname,
+                            lastName = lastname,
+                            email = email,
+                            alamat = alamat,
+                            password = password
+                        )
+                    )
                 },
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
@@ -169,12 +216,18 @@ fun registerScreen(navController: NavController, authViewModel: AuthViewModel = 
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = buildAnnotatedString {
                 append("Sudah punya akun? ")
-                withStyle(style = SpanStyle(color = MaterialTheme.colors.primary)){
+                withStyle(style = SpanStyle(color = MaterialTheme.colors.primary)) {
                     append("masuk")
                 }
-            }, modifier = Modifier.clickable { navController.navigate(Constant.Route.loginScreen) {
-                popUpTo(Constant.Route.registerScreen) { inclusive = true }
-            } })
+            }, modifier = Modifier
+                .clickable {
+                    navController.navigate(Constant.Route.loginScreen) {
+                        popUpTo(Constant.Route.registerScreen) { inclusive = true }
+                    }
+                }
+                .fillMaxWidth(0.9f)
+                .align(Alignment.CenterHorizontally)
+            )
         }
     }
 }
